@@ -1,47 +1,26 @@
 CC = gcc
 CFLAGS = -std=gnu99 -Wall -g -c
-EXECS = main help showfat showsector structure traverse
+EXECS = server client
 
 all: $(EXECS)
 
-main: main.o flop.o
-	$(CC) main.o flop.o -o main
+server: server.o utility.o
+	$(CC) server.o utility.o -o server
 
-main.o: main.c
-	$(CC) $(CFLAGS) main.c
+server.o: server.c
+	$(CC) $(CFLAGS) server.c
 
-flop.o: flop.c flop.h
-	$(CC) $(CFLAGS) flop.c
+utility.o: utility.c utility.h
+	$(CC) $(CFLAGS) utility.c
+	
+client: client.o c_util.o
+	$(CC) client.o c_util.o -o client
 
-help: help.o
-	$(CC) help.o -o help
+client.o: client.c
+	$(CC) $(CFLAGS) client.c
 
-help.o: help.c
-	$(CC) $(CFLAGS) help.c
-
-showfat: showfat.o
-	$(CC) showfat.o -o showfat
-
-showfat.o: showfat.c
-	$(CC) $(CFLAGS) showfat.c
-
-showsector: showsector.o
-	$(CC) showsector.o -o showsector
-
-showsector.o: showsector.c
-	$(CC) $(CFLAGS) showsector.c
-
-structure: structure.o
-	$(CC) structure.o -o structure
-
-structure.o: structure.c
-	$(CC) $(CFLAGS) structure.c
-
-traverse: traverse.o
-	$(CC) traverse.o -o traverse
-
-traverse.o: traverse.c
-	$(CC) $(CFLAGS) traverse.c
+c_util.o: c_util.c c_util.h
+	$(CC) $(CFLAGS) c_util.c
 
 clean:
 	$(RM) *.o $(EXECS)
