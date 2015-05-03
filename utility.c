@@ -39,7 +39,6 @@ void get_sector_data(u_long sector_number) {
     totalsec = lowbyte | (highbyte << 8); 	/* get the number of logical sectors */
 
     if (sector >= totalsec) perror("the sector number was too large");
-    //message.data = (char *) malloc(nbytesec);
     buf = (char *) malloc(nbytesec);
     cursor = sector * nbytesec;
     lseek_value = lseek(fd, cursor, SEEK_SET);
