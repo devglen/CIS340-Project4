@@ -28,20 +28,19 @@ void help() {
     fprintf(stdout, "    structure               - list the structure of the floppy disk image.\n");
     fprintf(stdout, "    traverse [-l]           - list the contents in the root directory. Optional -l flag gives a long listing of the root directory.\n");
     fprintf(stdout, "    showsector <sector_num> - show the content of the given sector.\n");
-    fprintf(stdout, "    showfat                 - show the content of the FAT table.\n");
     fprintf(stdout, "    quit                    - quit the floppy shell \n");
 }
 
 void showsector() {
     char* buf = (char*)message_buf.data;
     int i;
-    
+
     fprintf(stdout, "hex dump of sector : %d\n", (int)message_buf.sector_number);
     fprintf(stdout, "%5s", " ");
-    
+
     for (i=0;i<16;i++)
         fprintf(stdout, "%5x", i);
-        
+
     fprintf(stdout, "\n");
 
     for (i=0; i < message_buf.size; i++) {
@@ -57,7 +56,7 @@ void showsector() {
 
 void structure() {
     char* buf = (char*)message_buf.data;
-    
+
     unsigned short lowbyte, highbyte;
     unsigned short nbytesec; 	/* the number of bytes per sector */
     unsigned short nsector;	/* the number of sectors per cluster */
@@ -68,7 +67,7 @@ void structure() {
     unsigned short fatsize; /* the size of FAT table in terms of bytes */
     char *FAT; /* buffer for FAT table */
     int i = 0;
-    
+
     lowbyte = ((unsigned short) buf[11]) & 0xff;
     highbyte = ((unsigned short) buf[12]) & 0xff;
     nbytesec = lowbyte | (highbyte << 8);				/* get the number of bytes per sector */
@@ -86,19 +85,19 @@ void structure() {
 
     fatsize = nsecfat * nbytesec;
     FAT = (char *) malloc(fatsize);
-    
 
-    fprintf(stdout, "\n number of FAT: \t%d", nFAT);
-    fprintf(stdout, "\n number of sectors used by FAT: \t%d", nsecfat);
-    fprintf(stdout, "\n number of sectors per cluster: \t%d", nsector);
-    fprintf(stdout, "\n number of ROOT Entries: \t%d", rentry);
-    fprintf(stdout, "\n number of bytes per sector: \t%d", nbytesec);
-    fprintf(stdout, "\n ---Sector #---     ---Sector Types---");
-    fprintf(stdout, "\n       %d                  BOOT        ", i);
-    for (i = 0; i < nFAT; i++)
-            fprintf(stdout, "\t\t%5.2d -- %-15.2d FAT%-10d\n", nsecfat*i+1, nsecfat*(i+1), i+1);
-    fprintf(stdout, "\t\t%5.2d -- %-15.2d ROOT DIRECTORY\n", 1+nFAT*nsecfat, rentry*32/nbytesec+nFAT*nsecfat);
-    fprintf(stdout, "\n\n\n");
+    fprintf(stdout, "\t\tnumber of FAT:\t\t\t%5d\n", nFAT);
+    fprintf(stdout, "\t\tnumber of sectors used by FAT:\t%5d\n", nsecfat);
+    fprintf(stdout, "\t\tnumber of sectors per cluster:\t%5d\n", nsector);
+    fprintf(stdout, "\t\tnumber of ROOT Entries:\t\t%5d\n", rentry);
+    fprintf(stdout, "\t\tnumber of bytes per sector:\t%5d\n", nbytesec);
+    fprintf(stdout, "\t\t---Sector #---     ---Sector Types---\n");
+    fprintf(stdout, "\t\t      0                  BOOT       \n");
+
+	for (i=0;i<nFAT;i++)
+		fprintf(stdout, "\t\t%5.2d -- %-15.2d FAT%-10d\n", nsecfat*i+1, nsecfat*(i+1), i+1);
+	fprintf(stdout, "\t\t%5.2d -- %-15.2d ROOT DIRECTORY\n", 1+nFAT*nsecfat, rentry*32/nbytesec+nFAT*nsecfat);
+	fprintf(stdout, "\n\n\n");
 }
 
 void print_directories(unsigned short cluster, char *directory,
@@ -256,19 +255,19 @@ void print_files(char *buf, char *directory, char *flag) {
 
 void traverse(char* flag) {
     char* buf = (char*)message_buf.data;
-    
+
     //unsigned short bytes_per_sector; 	/* the number of bytes per sector */
     unsigned short low, high, fat_tables, values, fat_sectors, sectors, rootbytes, filebytes;
     char directory[256], file[9], extension[4];
     size_t number_of_bytes;
     number_of_bytes = sizeof(buf);
-    
+
     sectors = values * 32 / bytes_per_sector;
     rootbytes = fat_sectors * fat_tables + 1;
     filebytes = rootbytes + sectors;
 
     strcpy(directory, "/");
-    
+
     if (strcmp("-l", flag) == 0) {
         fprintf(stdout, " *****************************\n");
         fprintf(stdout, " ** FILE ATTRIBUTE NOTATION **\n");
@@ -279,7 +278,7 @@ void traverse(char* flag) {
         fprintf(stdout, " ** A ------ ARCHIVE FILE **\n");
         fprintf(stdout, " *****************************\n\n");
     }
-    
+
     /*for (int i = 0;i < values; i++) {
         // go to root entry
         if ((lseek(fd, rootbytes * bytes_per_sector + i * 32, 0)) != rootbytes * bytes_per_sector + i * 32) {
