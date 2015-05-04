@@ -16,6 +16,7 @@
 #include 	<unistd.h>
 #include 	<arpa/inet.h>
 #include 	<fcntl.h>
+#include 	<ctype.h>
 #include 	"c_util.h"
 
 int main(int argc, char *argv[]) {
