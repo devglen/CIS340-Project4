@@ -7,17 +7,18 @@
 #include	<signal.h>
 #include	<errno.h>
 #include	<strings.h>
+#include	<string.h>
 #include 	<stdlib.h>
 #include	<stdio.h>
 #include	<sys/types.h>
 #include	<sys/socket.h>
 #include	<netinet/in.h>
 #include	<netdb.h>
-#include    <arpa/inet.h>
-#include    <fcntl.h>
-#include    <string.h>
-#include    <unistd.h>
-#include    <sys/wait.h>
+#include    	<arpa/inet.h>
+#include    	<fcntl.h>
+#include    	<string.h>
+#include    	<unistd.h>
+#include    	<sys/wait.h>
 #include 	<ctype.h>
 #include 	"c_util.h"
 
@@ -63,10 +64,7 @@ void structure() {
     unsigned short nsector;	/* the number of sectors per cluster */
     unsigned short nFAT;	/* the number of FAT */
     unsigned short rentry;	/* the number of entries in the root directory */
-    unsigned short totalsec; 	/* the total number of logical sectors */
     unsigned short nsecfat; /* the number of sectors used by FAT */
-    unsigned short fatsize; /* the size of FAT table in terms of bytes */
-    char *FAT; /* buffer for FAT table */
     int i = 0;
 
     lowbyte = ((unsigned short) buf[11]) & 0xff;
@@ -78,14 +76,10 @@ void structure() {
     highbyte = ((unsigned short) buf[18]) & 0xff;
     rentry = lowbyte | (highbyte << 8);				/* get the number of root entries */
     lowbyte = ((unsigned short) buf[19]) & 0xff;
-    highbyte = ((unsigned short) buf[20]) & 0xff;
-    totalsec = lowbyte | (highbyte << 8);				/* get the number of logical sectors */
+    highbyte = ((unsigned short) buf[20]) & 0xff;			/* get the number of logical sectors */
     lowbyte = ((unsigned short) buf[22]) & 0xff;
     highbyte = ((unsigned short) buf[23]) & 0xff;
     nsecfat = lowbyte | (highbyte << 8);				/* get the number of sectors used by FAT */
-
-    fatsize = nsecfat * nbytesec;
-    FAT = (char *) malloc(fatsize);
 
     fprintf(stdout, "\t\tnumber of FAT:\t\t\t%5d\n", nFAT);
     fprintf(stdout, "\t\tnumber of sectors used by FAT:\t%5d\n", nsecfat);
@@ -276,8 +270,6 @@ void traverse(char* flag) {
     //unsigned short bytes_per_sector; 	/* the number of bytes per sector */
     unsigned short low, high, fat_tables, values, fat_sectors, sectors, rootbytes, filebytes;
     char directory[256], file[9], extension[4];
-    size_t number_of_bytes;
-    number_of_bytes = sizeof(buf);
 
     low = ((unsigned short) buf[11]) & 0xff;
 	high = ((unsigned short) buf[12]) & 0xff;
