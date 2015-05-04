@@ -97,88 +97,89 @@ void structure() {
 	for (i=0;i<nFAT;i++)
 		fprintf(stdout, "\t\t%5.2d -- %-15.2d FAT%-10d\n", nsecfat*i+1, nsecfat*(i+1), i+1);
 	fprintf(stdout, "\t\t%5.2d -- %-15.2d ROOT DIRECTORY\n", 1+nFAT*nsecfat, rentry*32/nbytesec+nFAT*nsecfat);
-	fprintf(stdout, "\n\n\n");
+	fprintf(stdout, "\n");
 }
 
 void print_directories(unsigned short cluster, char *directory,
 		unsigned short filebytes, unsigned short num_of_sectors,
 		unsigned short bytes_per_sector, char *flag) {
-    char buf[32], dirname[9], adir[256], ext[4];
-    unsigned short new_cluster, low, high;
-    unsigned ptr;
-    int counter = 0;
+	char buf[32], dirname[9], adir[256], ext[4];
+	unsigned short new_cluster, low, high;
+	unsigned ptr;
+	int counter = 0;
 
-    /*ptr = (filebytes + (cluster - 2)*num_of_sectors)*bytes_per_sector;
-    buf[0] = '$';
-    strcpy(adir, directory);
-    if ((lseek(fd, ptr, 0)) != ptr) {
-        printf("Error setting the file pointer to beginning\n");
-        exit(1);
-    }
+	ptr = (filebytes + (cluster - 2)*num_of_sectors)*bytes_per_sector;
+	strcpy(adir, directory);
+	if ((lseek(fd, ptr, 0)) != ptr) {
+		printf("Error setting the file pointer to beginning\n");
+		exit(1);
+	}
 
-    if ((read(fd, buf, sizeof(buf))) != sizeof(buf)) {
-        printf("Error reading file entry\n");
-        exit(1);
-    }
+	int bytesread;
+	if ( ( bytesread = read(fd, buf, sizeof(buf)) ) < 0) {
+		printf("Error reading file entry\n");
+		exit(1);
+	}
 
-    while (buf[0] != 0x0) {
-        if (counter++ >= num_of_sectors*bytes_per_sector/32) {
-            if (cluster%2) {
-                low = (((unsigned short) fat_buffer[(3*cluster - 1)/2])>>4) & 0x000f;
-                high = (((unsigned short) fat_buffer[(3*cluster + 1)/2])<<4) & 0x0ff0;
-            }else {
-                low = ((unsigned short) fat_buffer[3*cluster/2]) & 0x00ff;
-                high = (((unsigned short) fat_buffer[(3*cluster + 2)/2])<<8) & 0x0f00;
-            }
-            cluster = low | high;
-            if (cluster == 0x0 || cluster > 0xff0) {
-                break;
-            }
-            else {
-                counter = 0;
-                ptr = (filebytes + (cluster - 2)*num_of_sectors)*bytes_per_sector;
-                if ((lseek(fd, ptr, 0)) != ptr) {
-                    printf("There was a problem moving the pointer \n");
-                    exit(1);
-                }
-                if ((read(fd, buf, sizeof(buf))) != sizeof(buf)) {
-                    printf("Error reading file entry\n");
-                    exit(1);
-                }
-                continue;
-            }
-        }
+	while (buf[0] != 0x0) {
+		if (counter++ >= num_of_sectors*bytes_per_sector/32) {
+			if (cluster%2) {
+					low = (((unsigned short) fat_buffer[(3*cluster - 1)/2])>>4) & 0x000f;
+					high = (((unsigned short) fat_buffer[(3*cluster + 1)/2])<<4) & 0x0ff0;
+			}else {
+					low = ((unsigned short) fat_buffer[3*cluster/2]) & 0x00ff;
+					high = (((unsigned short) fat_buffer[(3*cluster + 2)/2])<<8) & 0x0f00;
+			}
+			cluster = low | high;
+			if (cluster == 0x0 || cluster > 0xff0) {
+				break;
+			}
+			else {
+				counter = 0;
+				ptr = (filebytes + (cluster - 2)*num_of_sectors)*bytes_per_sector;
+				if ((lseek(fd, ptr, 0)) != ptr) {
+					printf("There was a problem moving the pointer \n");
+					exit(1);
+				}
+				if ((read(fd, buf, sizeof(buf))) != sizeof(buf)) {
+					printf("Error reading file entry\n");
+					exit(1);
+				}
+				continue;
+			}
+		}
 
-        // exclude free space and removed files
-        if (isprint((unsigned short) (buf[0] & 0xff)) && (unsigned short) (buf[0] & 0xff) != 0xe5
-                        && (unsigned short) (buf[11]&0x08) != 0x08) {
-            print_files(buf, directory, flag);
-            if (buf[11]&0x10) {
-                new_cluster = (((unsigned short) buf[26]) & 0xff) | (((unsigned short) buf[27]) & 0x0f)<<8;
-                strncpy(dirname, buf, 8);
-                strncpy(ext, buf+8, 3);
-                dirname[8] = '\0';
-                ext[3] = '\0';
-                trim(dirname);
-                trim(ext);
-                if (strcmp(dirname, ".") && strcmp(dirname, "..")) {
-                        strcat(adir, dirname);
-                        if (ext[0] != '\0') {
-                                strcat(adir, ".");
-                                strcat(adir, ext);
-                        }
-                        strcat(adir, "/");
-                        print_directories(new_cluster, adir, filebytes, num_of_sectors, bytes_per_sector, flag);
-                        // reset pointer
-                        lseek(fd, ptr + counter * 32, 0);
-                }
-            }
-        }
-        if ((read(fd, buf, sizeof(buf))) != sizeof(buf)) {
-            printf("There was a problem reading the next file/entry\n");
-            exit(1);
-        }
-    }*/
+		// exclude free space and removed files
+		if (isprint((unsigned short) (buf[0] & 0xff))
+				&& (unsigned short) (buf[0] & 0xff) != 0xe5
+				&& (unsigned short) (buf[11]&0x08) != 0x08) {
+			print_files(buf, directory, flag);
+			if (buf[11]&0x10) {
+				new_cluster = (((unsigned short) buf[26]) & 0xff) | (((unsigned short) buf[27]) & 0x0f)<<8;
+				strncpy(dirname, buf, 8);
+				strncpy(ext, buf+8, 3);
+				dirname[8] = '\0';
+				ext[3] = '\0';
+				trim(dirname);
+				trim(ext);
+				if (strcmp(dirname, ".") && strcmp(dirname, "..")) {
+					strcat(adir, dirname);
+					if (ext[0] != '\0') {
+						strcat(adir, ".");
+						strcat(adir, ext);
+					}
+					strcat(adir, "/");
+					print_directories(new_cluster, adir, filebytes, num_of_sectors, bytes_per_sector, flag);
+					// reset pointer
+					lseek(fd, ptr + counter * 32, 0);
+				}
+			}
+		}
+		if ((read(fd, buf, sizeof(buf))) < 0) {
+			printf("There was a problem reading the next file/entry\n");
+			exit(1);
+		}
+	}
 }
 
 void trim(char *str) {
@@ -206,7 +207,7 @@ void print_files(char *buf, char *directory, char *flag) {
     char attributes[] = "----";
     unsigned filesize;
 
-    //dir_cluster = (((unsigned short) buf[26]) & 0xff) | (((unsigned short) buf[27]) & 0x0f)<<8;
+    unsigned short dir_cluster = (((unsigned short) buf[26]) & 0xff) | (((unsigned short) buf[27]) & 0x0f)<<8;
     strncpy(file, buf, 8);
     strncpy(extension, buf+8, 3);
     file[8] = '\0';
@@ -243,7 +244,7 @@ void print_files(char *buf, char *directory, char *flag) {
                 fprintf(stdout, "%10d     ", filesize);
         }
         fprintf(stdout, "%-40s", filename);
-        fprintf(stdout, "%10d\n", cluster);
+        fprintf(stdout, "%10d\n", dir_cluster);
     } else {
         fprintf(stdout, "%-40s", filename);
         if (buf[11]&0x10) {
@@ -254,13 +255,54 @@ void print_files(char *buf, char *directory, char *flag) {
 }
 
 void traverse(char* flag) {
-    char* buf = (char*)message_buf.data;
+	if ((fd = open("temp_image", O_RDONLY)) >= 0) {
+		// opened the temp file
+	} else {
+		fprintf(stdout, "The temp file was not mounted, check location and filename and try again.");
+	}
+
+	if ((lseek(fd, SEEK_SET, SEEK_SET)) != 0) {
+		fprintf(stdout, "There was a problem setting pointer to beginning of temp file\n");
+		exit(1);
+	}
+
+	if ((read(fd, buf, sizeof(buf)) < 0)){
+		fprintf(stdout, "Error reading from temp file, try again.\n");
+		exit(1);
+	}
+
 
     //unsigned short bytes_per_sector; 	/* the number of bytes per sector */
     unsigned short low, high, fat_tables, values, fat_sectors, sectors, rootbytes, filebytes;
     char directory[256], file[9], extension[4];
     size_t number_of_bytes;
     number_of_bytes = sizeof(buf);
+
+    low = ((unsigned short) buf[11]) & 0xff;
+	high = ((unsigned short) buf[12]) & 0xff;
+	bytes_per_sector = low | (high << 8);
+	num_of_sectors = ((unsigned short) buf[13]) & 0xff;
+	fat_tables = ((unsigned short) buf[16]) & 0xff;
+	low = ((unsigned short) buf[17]) & 0xff;
+	high = ((unsigned short) buf[18]) & 0xff;
+	values = low | (high << 8);
+	low = ((unsigned short) buf[22]) & 0xff;
+	high = ((unsigned short) buf[23]) & 0xff;
+	fat_sectors = low | (high << 8);
+
+	fatbytes = fat_sectors * bytes_per_sector;
+	fat_buffer = (char *) malloc(fatbytes);
+
+	if ((lseek(fd, bytes_per_sector, SEEK_SET)) != bytes_per_sector) {
+		fprintf(stdout, "There was an issue setting the cursor of temp file\n");
+		exit(1);
+	}
+
+	if ((read(fd, fat_buffer, fatbytes)) != fatbytes) {
+		fprintf(stdout, "There was an error reading the temp file\n");
+		exit(1);
+	}
+
 
     sectors = values * 32 / bytes_per_sector;
     rootbytes = fat_sectors * fat_tables + 1;
@@ -279,20 +321,21 @@ void traverse(char* flag) {
         fprintf(stdout, " *****************************\n\n");
     }
 
-    /*for (int i = 0;i < values; i++) {
+    for (int i = 0;i < values; i++) {
         // go to root entry
         if ((lseek(fd, rootbytes * bytes_per_sector + i * 32, 0)) != rootbytes * bytes_per_sector + i * 32) {
-            printf("There was an error reading entries in floppy \n");
+            fprintf(stdout, "There was an error reading entries in temp file \n");
             exit(1);
         }
 
         if ((read(fd, buf, sizeof(buf))) != sizeof(buf)) {
-            printf("There was an error reading directory \n");
+            fprintf(stdout, "There was an error reading directory \n");
             exit(1);
         }
 
         // skip deleted files or free space
-        if (((unsigned short) (buf[0]&0xff) == 0xe5) || ((unsigned short) (buf[0]&0xff) == 0x0) || ((unsigned short) (buf[11]&0x08) == 0x08)) {
+        if (((unsigned short) (buf[0]&0xff) == 0xe5) || ((unsigned short) (buf[0]&0xff) == 0x0) ||
+        		((unsigned short) (buf[11]&0x08) == 0x08)) {
             continue;
         }
 
@@ -316,5 +359,7 @@ void traverse(char* flag) {
             strcpy(directory, "/");
         }
     }
-    free(fat_buffer);*/
+    free(fat_buffer);
+    close(fd);
+    remove("temp_image");
 }
