@@ -4,7 +4,6 @@
  *  Created on: May 2, 2015
  *      Author: Glen
  */
-
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
