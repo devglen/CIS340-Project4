@@ -18,36 +18,21 @@
 #include 	<fcntl.h>
 #include 	"c_util.h"
 
-#define MAX_BUF_LENGTH 4096
-
 int main(int argc, char *argv[]) {
 	int	socket_fd, send_len, recv_len;
-	//int from_size;
 	struct sockaddr_in	dest, from_serv;
 	struct hostent *gethostbyname(), *hostptr;
 	socklen_t fsize = sizeof(from_serv);
 
-
-	// where socketfd is the socket you want to make non-blocking
-	//int status = fcntl(socket_fd, F_SETFL, fcntl(socket_fd, F_GETFL, 0) | O_NONBLOCK);
-
-	//if (status == -1){
-	  //perror("calling fcntl");
-	  // handle the error.  By the way, I've never seen fcntl fail in this way
-	//}
-
-//	fprintf( stdout, "RECV_UDP Local socket is: \n");
-//	printf ("  family %d, addr %s, port %d\n", dest.sin_family,
-//			inet_ntoa(dest.sin_addr), ntohs((unsigned short)(dest.sin_port)));
-//	fflush(stdout);
-
 	while ( 1 ) {
+		int standard_receive = 1, first = 1;
 		memset(&message_buf, 0, sizeof(message_buf));
 		fprintf(stdout, "flop: ");
+		fflush(stdout);
 
 		char input[50], command[50], arg[50];
-		fgets(input, 50, stdin); //read line
-		sscanf(input, "%s", command); //separate out first arg, consider using strtok() instead of sscanf()
+		fgets(input, 50, stdin); //read command line
+		sscanf(input, "%s", command);
 
 		if (strcmp("quit", command) == 0) {
 			fprintf(stdout, "\n Exiting the floppy disk shell... \n");
@@ -114,8 +99,6 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 		} else if (strcmp("structure", command) == 0) {
-			sscanf(input, "%s %s", command, arg);
-
 			message_buf.sector_number = 0;
 			strcpy(message_buf.cmd, command);
 
@@ -125,11 +108,62 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 		} else if(strcmp("traverse", command) == 0) {
+			standard_receive = 0;
 			if (strstr(input, "-l") == NULL) {
-				traverse(command);
+
+				strcpy(message_buf.cmd, command);
+
+				for (int i = 0; i < 33; i++) {
+					message_buf.sector_number = i;
+					send_len = sendto(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&dest, sizeof(dest));
+					if (send_len < 0) {
+						perror("There was an error, please make sure the floppy is mounted. ");
+						exit(1);
+					}
+
+					memset(&message_buf, 0, sizeof(message_buf));
+
+					recv_len = recvfrom(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&from_serv, &fsize);
+
+					fd = open("temp_image", O_WRONLY |  O_CREAT | O_APPEND, 0644);
+					if (fd < 0) {
+						fprintf(stdout, "ERROR CREATING FILE\n");
+					}
+					if (write(fd, message_buf.data, message_buf.size) != message_buf.size) {
+						write(2, "There was an error writing to temp file\n", 43);
+						return -1;
+					}
+
+				}
+				close(fd);
 			} else if (strstr(input, "-l") != NULL) {
 				sscanf(input, "%s %s", command, arg);
-				traverse(arg);
+
+				strcpy(message_buf.cmd, command);
+
+				for (int i = 0; i < 33; i++) {
+					message_buf.sector_number = i;
+					send_len = sendto(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&dest, sizeof(dest));
+					if (send_len < 0) {
+						perror("There was an error, please make sure the floppy is mounted. ");
+						exit(1);
+					}
+
+					memset(&message_buf, 0, sizeof(message_buf));
+
+					recv_len = recvfrom(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&from_serv, &fsize);
+
+					fd = open("temp_image", O_WRONLY |  O_CREAT | O_APPEND, 0644);
+					if (fd < 0) {
+						fprintf(stdout, "ERROR CREATING FILE\n");
+					}
+					if (write(fd, message_buf.data, message_buf.size) != message_buf.size) {
+						write(2, "There was an error writing to temp file\n", 43);
+						return -1;
+					}
+
+				}
+				close(fd);
 			}
 			else {
 				printf("Error invalid argument, please try again! \n");
@@ -140,19 +174,11 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 
-		memset(&message_buf, 0, sizeof(message_buf));
+		if (standard_receive) {
+			memset(&message_buf, 0, sizeof(message_buf));
 
-		recv_len = recvfrom(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&from_serv, &fsize);
-
-		/*do {
 			recv_len = recvfrom(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&from_serv, &fsize);
-
-			if (recv_len == -1) {
-				fprintf(stdout, "There was an error");
-			} else {
-				rcv_data += message_buf.data;
-			}
-		} while ( recv_len >= MAX_BUF_LENGTH );*/
+		}
 
 		if (strcmp("fmount", command) == 0) {
 			fprintf(stdout, "%s\n", message_buf.data);
