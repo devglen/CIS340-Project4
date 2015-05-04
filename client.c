@@ -7,6 +7,7 @@
 #include	<signal.h>
 #include	<errno.h>
 #include	<strings.h>
+#include	<string.h>
 #include 	<stdlib.h>
 #include	<stdio.h>
 #include	<sys/types.h>
@@ -26,7 +27,7 @@ int main(int argc, char *argv[]) {
 	socklen_t fsize = sizeof(from_serv);
 
 	while ( 1 ) {
-		int standard_receive = 1, first = 1;
+		int standard_receive = 1;
 		memset(&message_buf, 0, sizeof(message_buf));
 		fprintf(stdout, "flop: ");
 		fflush(stdout);
@@ -126,6 +127,10 @@ int main(int argc, char *argv[]) {
 
 					recv_len = recvfrom(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&from_serv, &fsize);
 
+					if (recv_len < 0) {
+						perror("There was an error receiving data from server\n");
+					}
+					
 					fd = open("temp_image", O_WRONLY |  O_CREAT | O_APPEND, 0644);
 					if (fd < 0) {
 						fprintf(stdout, "ERROR CREATING FILE\n");
@@ -154,6 +159,10 @@ int main(int argc, char *argv[]) {
 
 					recv_len = recvfrom(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&from_serv, &fsize);
 
+					if (recv_len < 0) {
+						perror("There was an error receiving data from server\n");
+					}
+					
 					fd = open("temp_image", O_WRONLY |  O_CREAT | O_APPEND, 0644);
 					if (fd < 0) {
 						fprintf(stdout, "ERROR CREATING FILE\n");
@@ -179,6 +188,10 @@ int main(int argc, char *argv[]) {
 			memset(&message_buf, 0, sizeof(message_buf));
 
 			recv_len = recvfrom(socket_fd, &message_buf, sizeof(message_buf), 0, (struct sockaddr *)&from_serv, &fsize);
+			
+			if (recv_len < 0) {
+				perror("There was an error receiving data from server\n");
+			}		
 		}
 
 		if (strcmp("fmount", command) == 0) {
