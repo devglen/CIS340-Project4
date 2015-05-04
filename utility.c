@@ -1,4 +1,3 @@
-
 #include	<strings.h>
 #include 	<stdlib.h>
 #include	<stdio.h>
@@ -26,7 +25,7 @@ void get_sector_data(u_long sector_number) {
     unsigned cursor;
     unsigned short nbytesec; 	/* the number of bytes per sector */
     unsigned short totalsec; 	/* the total number of logical sectors */
-	
+
     lseek_value = lseek(fd, SEEK_SET, SEEK_SET); /* rewind the cursor */
     if (lseek_value != 0) perror("error in setting the file descriptor cursor");
     nread = read(fd, boot, sizeof(boot)); /* read first 32 bytes in boot sector */
@@ -39,6 +38,7 @@ void get_sector_data(u_long sector_number) {
     totalsec = lowbyte | (highbyte << 8); 	/* get the number of logical sectors */
 
     if (sector >= totalsec) perror("the sector number was too large");
+    //message.data = (char *) malloc(nbytesec);
     buf = (char *) malloc(nbytesec);
     cursor = sector * nbytesec;
     lseek_value = lseek(fd, cursor, SEEK_SET);
