@@ -7,6 +7,7 @@
 #include	<signal.h>
 #include	<errno.h>
 #include	<strings.h>
+#include	<string.h>
 #include 	<stdlib.h>
 #include	<stdio.h>
 #include	<sys/types.h>
@@ -54,7 +55,7 @@ int main(int argc, char *argv[]) {
 
 	listen(socket_fd, 1);
 
-	int consocket = accept(socket_fd, (struct sockaddr *)&from_serv, &socksize);
+	accept(socket_fd, (struct sockaddr *)&from_serv, &socksize);
 
 	while( 1 ) {
 		memset(&message, 0, sizeof(message));
@@ -86,7 +87,7 @@ int main(int argc, char *argv[]) {
 			}
 
 		} else {
-			consocket = accept(socket_fd, (struct sockaddr *)&from_serv, &socksize);
+			accept(socket_fd, (struct sockaddr *)&from_serv, &socksize);
 		}
 	}
 	return 0;
