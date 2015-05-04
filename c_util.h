@@ -4,7 +4,6 @@
  *  Created on: May 2, 2015
  *      Author: Glen
  */
-
 #ifndef C_UTIL_H_
 #define C_UTIL_H_
 
@@ -14,6 +13,8 @@ unsigned short num_of_sectors;
 unsigned short fatbytes;
 unsigned short cluster;
 char *fat_buffer;
+char buf[32];
+char recv_buf[6656];
 
 struct {
 	char cmd[50];
