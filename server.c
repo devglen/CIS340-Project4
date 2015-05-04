@@ -4,7 +4,6 @@
  *  Created on: Apr 28, 2015
  *      Author: Glen
  */
-
 #include	<signal.h>
 #include	<errno.h>
 #include	<strings.h>
@@ -61,10 +60,7 @@ int main(int argc, char *argv[]) {
 		memset(&message, 0, sizeof(message));
 		recv_len = recvfrom(socket_fd, &message, sizeof(message), 0, (struct sockaddr *)&from_serv, &socksize);
 		if (recv_len < 0)
-			perror("recv_udp:recvfrom");
-//		fprintf(stdout, "recv_udp: %d, Packet from:", &from_serv);
-//		fprintf(stdout, "Got data ::%s%s\n",message.cmd,message.data);
-//		fflush(stdout);
+			perror("Error Receiving data packet from client\n");
 
 		if(recv_len > 0){
 			printf("Incoming connection from %s \n", inet_ntoa(from_serv.sin_addr));
@@ -85,10 +81,10 @@ int main(int argc, char *argv[]) {
 			} else {
 				get_sector_data(message.sector_number);
 				memcpy(message.data, buf, message.size);
-				
+
 				sendto(socket_fd, &message, sizeof(message), 0, (struct sockaddr *)&from_serv, sizeof(from_serv));
 			}
-			
+
 		} else {
 			consocket = accept(socket_fd, (struct sockaddr *)&from_serv, &socksize);
 		}
